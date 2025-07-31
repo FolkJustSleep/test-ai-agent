@@ -23,6 +23,7 @@ tools = [{
     }
 }]
 
+
 response = client.chat.completions.create(
     model=client.models.list().data[0].id,
     messages=[{"role": "user", "content": "What's the weather like in San Francisco?"}],
@@ -30,7 +31,13 @@ response = client.chat.completions.create(
     tool_choice="auto"
 )
 
-tool_call = response.choices[0].message.tool_calls[0].function
-print(f"Function called: {tool_call.name}")
-print(f"Arguments: {tool_call.arguments}")
-print(f"Result: {get_weather(**json.loads(tool_call.arguments))}")
+tool_calls = response.choices[0].message.tool_calls
+
+if tool_calls:
+    tool_call = tool_calls[0].function
+    print(f"Function called: {tool_call.name}")
+    print(f"Arguments: {tool_call.arguments}")
+    print(f"Result: {get_weather(**json.loads(tool_call.arguments))}")
+else:
+    print("❌ Model did not trigger any tool calls.")
+    print("Response content:", response.choices[0].message.content)
